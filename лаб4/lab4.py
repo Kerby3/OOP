@@ -45,6 +45,7 @@ class virtualKeyboard:
             self.actions[key] = action
             self.actions[key].execute()
         self.history.append(self.actions[key])
+        print("Консоль: " + "".join(self.prepareHistory()))
 
     def pressKombo(self, keys):
         if ' + '.join(keys) in self.actions.keys():
@@ -54,58 +55,61 @@ class virtualKeyboard:
             self.actions[' + '.join(keys)] = action
             self.actions[' + '.join(keys)].execute()
         self.history.append(self.actions[' + '.join(keys)])
+        print("Консоль: " + "".join(self.prepareHistory()))
             
 
     def undo(self):
-        if self.history:
+        if len(self.history) != 0:
             action = self.history.pop()
             action.undo()
+            print("Консоль: " + "".join(self.prepareHistory()))
+        else:
+            print("История пуста")
             
-    def showHistory(self):
+    def prepareHistory(self):
         tmp = []
         for element in self.history:
             tmp.append(element.prepareToShow())
-        print(tmp)
+        return tmp
 
     def renameKey(self, oldValue, newValue):
         isExists = False
-        for element in self.history:
-            if element.prepareToShow() == oldValue:
-                element.key = newValue
-                isExists = True
         for key in self.actions:
             if oldValue == self.actions[key].prepareToShow():
+                print("Клавиша " + self.actions[oldValue].prepareToShow(), end="")
                 self.actions[oldValue] = keyPressAction(newValue)
                 isExists = True
+                print(" переназначена на " + self.actions[oldValue].prepareToShow())
         if isExists is False:
             print("Такой клавиши не существует!")
 
     def renameCombo(self, oldValue, newValue):
         isExists = False
-        for element in self.history:
-            if element.prepareToShow() == oldValue:
-                element.keys = newValue.split(' + ')
-                isExists = True
         for key in self.actions:
             if oldValue == self.actions[key].prepareToShow():
+                print("Комбинация клавиш " + self.actions[oldValue].prepareToShow(), end="")
                 self.actions[oldValue] = comboPressAction(newValue.split(" + "))
                 isExists = True
+                print(" переназначена на " + self.actions[oldValue].prepareToShow())
         if isExists is False:
             print("Такой комбинации не существует!")
         
 class workflow:
     def showWorkflow(keyboard):
+        keyboard.undo()
         keyboard.pressKey('Q')
         time.sleep(1)
         keyboard.pressKey('W')
         time.sleep(1)
+        keyboard.undo()
         keyboard.pressKombo(['Ctrl', 'A'])
         time.sleep(1)
         keyboard.pressKombo(['Shift', 'Alt'])
         time.sleep(1)
-        keyboard.showHistory()
         keyboard.undo()
-        keyboard.showHistory()
+        keyboard.undo()
+        keyboard.undo()
+        print("=========================\n")
 
 keyboard = virtualKeyboard()
 workflow.showWorkflow(keyboard)
